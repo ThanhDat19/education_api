@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\OptionController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\TestController;
 use App\Http\Controllers\Admin\UploadController;
+use App\Http\Controllers\Admin\YouTubeController;
 use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -74,3 +75,5 @@ Route::get('/admin/options/list/{question}', [OptionController::class, 'index'])
 Route::get('/admin/options/edit/{option}/{question}', [OptionController::class, 'show']);
 Route::put('/admin/options/edit/{option}/{question}', [OptionController::class, 'update']);
 Route::delete('/admin/options/destroy', [OptionController::class, 'delete']);
+#Youtube
+Route::get('/youtube-duration', [YouTubeController::class, 'getVideoDuration']);

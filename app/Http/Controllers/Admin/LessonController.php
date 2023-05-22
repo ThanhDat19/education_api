@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Courses;
 use App\Models\Lesson;
+use Carbon\Carbon;
+use Carbon\CarbonInterval;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -12,6 +14,11 @@ use Illuminate\Support\Facades\Session;
 
 class LessonController extends Controller
 {
+    private $youTubeController;
+    function __construct(YouTubeController $youTubeController)
+    {
+        $this->youTubeController = $youTubeController;
+    }
 
     public function index(Courses $course)
     {
@@ -31,13 +38,42 @@ class LessonController extends Controller
         ]);
     }
 
+    public function getTime($timeCode)
+    {
+        $input = $timeCode;
+        $reptms = '/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/';
+        $hours = 0;
+        $minutes = 0;
+        $seconds = 0;
+        $totalseconds = 0;
+
+        if (preg_match($reptms, $input, $matches)) {
+            if (isset($matches[1])) {
+                $hours = (int)$matches[1];
+            }
+            if (isset($matches[2])) {
+                $minutes = (int)$matches[2];
+            }
+            if (isset($matches[3])) {
+                $seconds = (int)$matches[3];
+            }
+            $totalseconds = $hours * 3600 + $minutes * 60 + $seconds;
+        }
+
+        // $time = Carbon::createFromTimestamp($totalseconds)->format('H:i:s');
+        return $totalseconds;
+    }
+
     public function store(Request $request, Courses $course)
     {
+        $timeCode = $this->youTubeController->getVideoDuration($request->input('video_url'))->duration;
+        // dd($this->getTime($timeCode));
         Lesson::create([
             "course_id" => $course->id,
             "title" => $request->input('title'),
             "video_url" => $request->input('video_url'),
             "short_text" => $request->input('short_text'),
+            "video_time" => $this->getTime($timeCode),
             "full_text" => $request->input('full_text'),
             "position" => $request->input('position'),
             "free_lesson" => $request->input('free_lesson')
@@ -49,14 +85,14 @@ class LessonController extends Controller
         } catch (Exception $error) {
             Session::flash('error', 'Có lỗi vui lòng thử lại');
         }
-        return redirect()->route('course.lesson', ['course'=> $course->id]);
+        return redirect()->route('course.lesson', ['course' => $course->id]);
     }
 
 
     public function show(Lesson $lesson)
     {
         return view('admin.lessons.edit', [
-            'title' => 'Chỉnh Sửa Bài Học '. $lesson->title,
+            'title' => 'Chỉnh Sửa Bài Học ' . $lesson->title,
             'lesson' => $lesson
         ]);
     }
@@ -79,7 +115,7 @@ class LessonController extends Controller
         } catch (\Exception $err) {
             Session::flash('error', 'Có lỗi vui lòng thử lại');
         }
-        return redirect()->route('course.lesson', ['course'=> $course->id]);
+        return redirect()->route('course.lesson', ['course' => $course->id]);
     }
     public function delete(Request $request)
     {
