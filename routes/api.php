@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\API\CoursesController;
 use App\Http\Controllers\API\LessonController;
 use App\Http\Controllers\API\TestController;
@@ -50,3 +51,6 @@ Route::get('/course-details/{slug}/learn', [LessonController::class, 'getListLes
 
 //Test Route
 Route::get('/tests/{lesson}', [TestController::class, 'getTest']);
+//Payment Route
+Route::post('/create-payment', [PaymentController::class, 'createPayment']);
+
